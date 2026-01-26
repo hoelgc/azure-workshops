@@ -8,6 +8,11 @@ on:
       - '**'  # Triggers on push to any branch - useful for development
   workflow_dispatch:  # Enables manual trigger from GitHub UI - helpful for testing
 
+# Define default shell being used
+defaults:
+  run:
+    shell: zsh
+    
 # Jobs are the main building blocks of a workflow
 jobs:
   build:
@@ -36,8 +41,6 @@ jobs:
       - name: Install npm packages
         working-directory: azure/Workshop_2/Start/AzureWorkshopApp  # Changes directory to where package.json is located
         run: npm install
-        with:
-          shell: zsh
       
       # Restore .NET project dependencies
       - name: Restore dependencies
