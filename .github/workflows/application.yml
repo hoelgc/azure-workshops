@@ -13,10 +13,10 @@ jobs:
   build:
   # Specifies the type of runner to execute the job
     runs-on: ubuntu-latest
-    # Define default shell being used
-    defaults:
-      run:
-        shell: zsh
+#    # Define default shell being used
+#    defaults:
+#      run:
+#        shell: zsh
 
   # Sequential steps to be executed as part of the job
     steps:
