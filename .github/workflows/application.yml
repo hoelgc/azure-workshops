@@ -34,8 +34,9 @@ jobs:
       
       # Install frontend dependencies from package.json
       - name: Install npm packages
-        working-directory: /Workshop_2/Start/AzureWorkshopApp  # Changes directory to where package.json is located
+        working-directory: azure/Workshop_2/Start/AzureWorkshopApp  # Changes directory to where package.json is located
         run: npm install
+        shell: zsh
       
       # Restore .NET project dependencies
       - name: Restore dependencies
