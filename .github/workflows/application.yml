@@ -46,7 +46,7 @@ jobs:
         # temp directory check
       - name: Check current directory
         run: pwd && ls -la
-        working-directory: Start
+        working-directory: Workshop_2/Start
         
       # Install frontend dependencies from package.json
       - name: Install npm packages
