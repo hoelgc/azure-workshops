@@ -55,3 +55,4 @@ jobs:
         with:
           name: dotnet-app  # Name of the artifact in GitHub
           path: ./publish   # Directory containing files to upload
+          
