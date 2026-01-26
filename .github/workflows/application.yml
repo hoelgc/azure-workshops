@@ -49,7 +49,7 @@ jobs:
       
       # Publish the application - creates deployment-ready files
       - name: Publish
-        working-directory: Workshop_2/Start/AzureWorkshop  # Changes directory to where the project file can be reached from
+#        working-directory: Workshop_2/Start/AzureWorkshop  # Changes directory to where the project file can be reached from
         run: dotnet publish ./AzureWorkshopApp/AzureWorkshopApp.csproj --configuration Release --output ./publish --no-build
       
       # Upload the published app as an artifact to Github
