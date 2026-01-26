@@ -43,6 +43,7 @@ jobs:
       
       # Restore .NET project dependencies
       - name: Restore dependencies
+        working-directory: Workshop_2/Start/AzureWorkshop  # Changes directory to where the solution file is located
         run: dotnet restore
       
       # Build the .NET project in Release mode
