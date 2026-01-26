@@ -13,24 +13,12 @@ jobs:
   build:
   # Specifies the type of runner to execute the job
     runs-on: ubuntu-latest
-#    # Define default shell being used
-#    defaults:
-#      run:
-#        shell: zsh
 
   # Sequential steps to be executed as part of the job
     steps:
       # Check out your repository code to the runner
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # temp check
-      - name: List files and directories
-        run: |
-          ls -lha
-          pwd
-      - name: Try listing files in specific directory
-        run: ls -lha Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
 
       # Set up .NET SDK environment
       - name: Setup .NET Core
@@ -44,28 +32,10 @@ jobs:
         with:
           node-version: '18'
       
-      # temp directory check
-      - name: Check current directory
-        run: pwd && ls -la
-      # temp directory check
-      - name: Check current directory
-        run: pwd && ls -la
-        working-directory: Workshop_2
-        # temp directory check
-      - name: Check current directory
-        run: pwd && ls -la
-        working-directory: Workshop_2/Start
-        # temp directory check
-      - name: Check current directory
-        run: pwd && ls -la
-        working-directory: Workshop_2/Start/AzureWorkshop
-        # temp directory check
-      - name: Check current directory
-        run: pwd && ls -la
-        working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
-        # temp check
-      - name: Check default shell
-        run: echo $SHELL
+#      # temp directory check
+#      - name: Check current directory
+#        run: pwd && ls -la
+      
       # Install frontend dependencies from package.json
       - name: Install npm packages
         working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp  # Changes directory to where package.json is located
