@@ -51,6 +51,10 @@ jobs:
       - name: Check current directory
         run: pwd && ls -la
         working-directory: Workshop_2/Start/AzureWorkshop
+        # temp directory check
+      - name: Check current directory
+        run: pwd && ls -la
+        working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
         
       # Install frontend dependencies from package.json
       - name: Install npm packages
