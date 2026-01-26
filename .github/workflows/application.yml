@@ -36,7 +36,8 @@ jobs:
       - name: Install npm packages
         working-directory: azure/Workshop_2/Start/AzureWorkshopApp  # Changes directory to where package.json is located
         run: npm install
-        shell: zsh
+        with:
+          shell: zsh
       
       # Restore .NET project dependencies
       - name: Restore dependencies
