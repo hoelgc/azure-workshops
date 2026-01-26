@@ -48,10 +48,12 @@ jobs:
       
       # Build the .NET project in Release mode
       - name: Build
+        working-directory: Workshop_2/Start/AzureWorkshop  # Changes directory to where the solution file is located
         run: dotnet build --configuration Release --no-restore  # --no-restore skips restore since we already did it
       
       # Publish the application - creates deployment-ready files
       - name: Publish
+#        working-directory: Workshop_2/Start/AzureWorkshop  # Changes directory to where the solution file is located
         run: dotnet publish ./AzureWorkshopApp/AzureWorkshopApp.csproj --configuration Release --output ./publish --no-build
       
       # Upload the published app as an artifact to Github
