@@ -36,6 +36,10 @@ jobs:
         with:
           node-version: '18'
       
+      # temp directory check
+      - name: Check current directory
+        run: pwd && ls -la
+
       # Install frontend dependencies from package.json
       - name: Install npm packages
         working-directory: Workshop_2/Start/AzureWorkshopApp  # Changes directory to where package.json is located
