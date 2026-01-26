@@ -68,7 +68,7 @@ jobs:
         run: echo $SHELL
       # Install frontend dependencies from package.json
       - name: Install npm packages
-        working-directory: Workshop_2/Start/AzureWorkshopApp  # Changes directory to where package.json is located
+        working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp  # Changes directory to where package.json is located
         run: npm install
       
       # Restore .NET project dependencies
