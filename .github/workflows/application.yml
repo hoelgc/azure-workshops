@@ -7,17 +7,16 @@ on:
     branches:
       - '**'  # Triggers on push to any branch - useful for development
   workflow_dispatch:  # Enables manual trigger from GitHub UI - helpful for testing
-
-# Define default shell being used
-defaults:
-  run:
-    shell: zsh
     
 # Jobs are the main building blocks of a workflow
 jobs:
   build:
   # Specifies the type of runner to execute the job
     runs-on: ubuntu-latest
+    # Define default shell being used
+    defaults:
+      run:
+        shell: zsh
 
   # Sequential steps to be executed as part of the job
     steps:
