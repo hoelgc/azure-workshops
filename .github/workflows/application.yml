@@ -23,7 +23,15 @@ jobs:
       # Check out your repository code to the runner
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
+      # temp check
+      - name: List files and directories
+        run: |
+          ls -lha
+          pwd
+      - name: Try listing files in specific directory
+        run: ls -lha ./Workshop_2/Start/AzureWorkshopApp
+
       # Set up .NET SDK environment
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
