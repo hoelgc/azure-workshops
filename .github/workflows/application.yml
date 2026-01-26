@@ -30,7 +30,7 @@ jobs:
           ls -lha
           pwd
       - name: Try listing files in specific directory
-        run: ls -lha ./Workshop_2/Start/AzureWorkshopApp
+        run: ls -lha Workshop_2/Start/AzureWorkshopApp
 
       # Set up .NET SDK environment
       - name: Setup .NET Core
