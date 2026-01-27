@@ -1,0 +1,55 @@
+# This workflow builds a .NET application and creates a deployable artifact
+name: Build .NET App
+
+# Defines when this workflow can be triggered
+# workflow_call allows this workflow to be called from other workflows
+on:
+  workflow_call: 
+
+# Jobs are the main building blocks of a workflow
+jobs:
+  build:
+    # Specifies the type of runner to execute the job
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checks out your repository code to the runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # Sets up the .NET SDK on the runner
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+          
+      # Install frontend dependencies from package.json
+      - name: Install npm packages
+        working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp  # Changes directory to where package.json is located
+        run: npm install
+
+      # Restore .NET project dependencies
+      - name: Restore dependencies
+        working-directory: Workshop_2/Start/AzureWorkshop  # Changes directory to where the solution file is located
+        run: dotnet restore
+      
+      # Debug step to show progress
+      - name: Echo build step
+        run: echo "Now building the application..."
+      
+      # Builds the application in Release configuration
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+        working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
+        
+      # Creates a publishable version of the application
+      - name: Publish
+        run: dotnet publish --no-build --configuration Release --output ./publish
+        working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
+        
+      # Saves the build output as en artifact for use in other workflows
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with: 
+          name: dotnet-app # Name of the artifact
+          path: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp/publish # Path to the files to upload
