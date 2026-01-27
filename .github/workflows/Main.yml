@@ -19,16 +19,37 @@ on:
 
 # Jobs run in parallel by default unless 'needs' is specified
 jobs:
-  # Build the .NET application
+  # Step 1: Build the .NET application
+  # This job compiles our code and creates artifacts
   build:
-    uses: ./.github/workflows/build.yml # References our build workflow. It compiles the app and creates artifacts
+    uses: ./.github/workflows/build.yml # References our build workflow.
   
-  # Second job: Deploy using yaml
-  deploy:
-    needs: [build,test]    # Waits for the build job to complete
-    uses: ./.github/workflows/deploy.yml   # References out deployment workflow
-    secrets: inherit  # Inherits secrets for Azure deployment
-    
+  # Step 2: Run automated tests
+  # This ensures our code changes haven't broken anything
   test:
     uses: ./.github/workflows/test.yml
-    needs: [build]
+    needs: [ build ]
+  
+  # Step 3: Publish to GitHub
+  # This will publish the built apps as an artifact in GitHub
+  publish:
+    uses: ./.github/workflows/publish.yml   # References our publish workflow
+    needs: [test]                           # Won't run until tests succeeds
+    
+  # Step 4: Deploy to test environment
+  # This gives us a chance to verify changes in a safe environment
+  deploy-test:
+    uses: ./.github/workflows/deploy.yml
+    with: 
+      releaseType: 'test'     # Specifies test environment
+    secrets: inherit          # Passes through repository secrets
+    needs: [publish]          # Won't run until publishing is finished
+    
+  # Step 5: Deploy to production
+  # Final step - only runs after successful test deployment
+  deploy-prod:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      releaseType: 'production'     # Specifies production environment
+    secrets: inherit                # Passes through repository secrets
+    needs: [deploy-test]            # Ensures test deployment succeeds before deploying to production

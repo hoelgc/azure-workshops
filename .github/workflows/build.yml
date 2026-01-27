@@ -4,8 +4,16 @@ name: Build .NET App
 # Defines when this workflow can be triggered
 # workflow_call allows this workflow to be called from other workflows
 on:
-  workflow_call: 
+  workflow_call:        # Allows this workflow to be called from another workflow
+  workflow_dispatch:    # Enables manual triggering of this workflow from the GitHub UI 
 
+# Concurrency settings prevent multiple instances of the same workflow from running simultaneously
+concurrency:
+  # The group defines which workflow should be considered as the same for concurrency purposes
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # When true, cancels any running workflow in the same group when a new one is triggered
+  cancel-in-progress: true
+  
 # Jobs are the main building blocks of a workflow
 jobs:
   build:
@@ -23,33 +31,47 @@ jobs:
         with:
           dotnet-version: '8.0.x'
           
+      # Caches NuGet packages to speed up future workflow runs
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          # Path to store the cached files
+          path: ~/.nuget/packages
+          # Cache key to identify this specific cache
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          # Fallback keys to use if the exact key doesn't exist
+          restore-keys: ${{runner.os }}-nuget-
+          
+      # Caches npm packages to speed up future workflow runs
+      - name: Cache npm packages
+        uses: actions/cache@v3
+        with:
+          # Path to store the cached npm files
+          path: ~/.npm
+          # Cache key based on the package-lock.json hash
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          # Fallback keys to use if the exact key doesn't exist
+          restore-keys: ${{ runner.os }}-node-
+          
       # Install frontend dependencies from package.json
       - name: Install npm packages
+        # Sets the working directory for this step
         working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp  # Changes directory to where package.json is located
-        run: npm install
+        # The pipe symbol | allows for multiple commands in a single step
+        # 'npm ci' = Clean install - uses package-lock.json for deterministic builds
+        # 'npm install' = Installs a specific dev dependency
+        run: |
+          npm ci 
+          npm install --save-dev @types/dropzone
 
       # Restore .NET project dependencies
       - name: Restore dependencies
         working-directory: Workshop_2/Start/AzureWorkshop  # Changes directory to where the solution file is located
         run: dotnet restore
       
-      # Debug step to show progress
-      - name: Echo build step
-        run: echo "Now building the application..."
-      
       # Builds the application in Release configuration
       - name: Build
+        # --no-restore skips the restore step since we already did it
+        # --configuration Release builds in release mode (optimized, no debug symbols)
         run: dotnet build --no-restore --configuration Release
         working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
-        
-      # Creates a publishable version of the application
-      - name: Publish
-        run: dotnet publish --no-build --configuration Release --output ./publish
-        working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
-        
-      # Saves the build output as en artifact for use in other workflows
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with: 
-          name: dotnet-app # Name of the artifact
-          path: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp/publish # Path to the files to upload

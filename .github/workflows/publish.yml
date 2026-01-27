@@ -1,0 +1,54 @@
+name: Publish and upload artifacts to GitHub
+
+on:
+  workflow_call: 
+    
+jobs:
+  publish: # The name of this job
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      
+    # Sets up the .NET SDK on the runner for building .NET applications
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+        
+    # Sets up Node.js on the runner for frontend processing
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        # Specifies which version of Node.js to install
+        node-version: '18'
+        
+    # Installs specific JavaScript dependencies needed for the application
+    - name: Install npm dependencies
+      # Direct npm command without working-directory implies it runs at repository root
+      run: npm install dropzone @types/dropzone
+      
+    # Restores the .NET dependencies based on project files
+    - name: Restore dependencies
+      working-directory: Workshop_2/Start/AzureWorkshop
+      # dotnet restore downloads all packages specified in project files
+      run: dotnet restore
+      
+    # Creates a publishable version of the application
+    - name: Publish
+      working-directory: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp
+      # --configuration Release builds in release mode (optimized)
+      # --output ./publish specifies the output directory for published files
+      run: dotnet publish --configuration Release --output ./publish
+
+    # Saves the build output as en artifact for use in other workflows
+    - name: Upload artifact
+      # This action allows storing build outputs for use between jobs or workflows
+      uses: actions/upload-artifact@v4
+      with:
+        name: dotnet-app-${{ github.sha }} # Name of the artifact with commit SHA for unique identification
+        path: Workshop_2/Start/AzureWorkshop/AzureWorkshopApp/publish # Path to the files to upload
+        # Compression level 9 is maximum compression to save storage space
+        compression-level: '9'
+        # Number of days to keep this artifact before automatic deletion
+        retention-days: 5
