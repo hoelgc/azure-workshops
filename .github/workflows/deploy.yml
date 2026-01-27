@@ -26,7 +26,7 @@ jobs:
     
     # Add variables section for environment-specific values
     env:
-      APP_NAME: app-azskolen-${{ inputs.releaseType }} # Dynamic app name based on environment
+      app-name: app-azskolen-${{ inputs.releaseType }} # Dynamic app name based on environment
 
     steps:
     # Clear any existing Azure credentials to ensure clean authentication
