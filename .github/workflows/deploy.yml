@@ -1,0 +1,39 @@
+# This workflow handles the deployment of our application to Azure Wep App Service
+# It's called by the main.yml workflow after build and login steps complete
+name: Build and deploy to GitHub
+
+# Indicates this workflow can be called by other workflows
+# This enables modular workflow design and reusability
+on:
+  workflow_call: 
+    
+jobs: 
+  deploy:
+    runs-on: ubuntu-latest      # Using Ubuntu for deployment tasks
+    environment: test           # Links to GitHub Environment 'test' containing deployment variables
+    
+    steps:
+    # Move Azure login step
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+      # These secrets should be configured in your GitHub Environment
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}               # Azure AD application ID
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}               # Azure AD tenant ID
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}   # Azure subscription ID
+    
+    # First, retrieve the build artifacts that were created in the build job
+    # These artifacts contain our compiled application ready for deployment
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with: 
+        name: dotnet-app      # Must match the artifact name from build.yml
+        path: ./publish       # Local path where artifacts will be downloaded
+        
+    # Deploy the application to Azure Web App
+    # This step requires prior Azure authentication from azure-login.yml
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ vars.AZURE_WEBAPP_NAME }}       # Name of your Azure Web App
+        package: ./publish                            # Path to deployment package
