@@ -16,8 +16,7 @@ jobs:
     # Clear any existing Azure credentials to ensure clean authentication
     - name: Clear Azure CLI Account
       run: |
-        az logout\
-         az login
+        az account clear
         
     # Move Azure login step
     - name: Azure Login
