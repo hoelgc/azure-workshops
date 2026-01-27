@@ -1,0 +1,34 @@
+# This is the main orchestrator workflow that coordinates the entire CI/CD pipeline
+# It demonstrates how to organize deployments into separate, reusable workflows
+name: CI/CD Pipeline
+
+# Add permissions block at workflow level
+permissions:
+  id-token: write # Required for OIDC authentication with Azure
+  contents: read  # Required for checking out code
+  
+# Define when this workflow should run
+on:
+  push:
+    branches:
+      - main
+  pull_request: 
+    branches:
+    - main            # Runs on PR to master branch
+  workflow_dispatch:  # Allows manual triggers from GitHub UI
+
+# Jobs run in parallel by default unless 'needs' is specified
+jobs:
+  # Build the .NET application
+  build:
+    uses: ./.github/workflows/build.yml # References our build workflow. It compiles the app and creates artifacts
+  
+  # Second job: Deploy using yaml
+  deploy:
+    needs: [build,test]    # Waits for the build job to complete
+    uses: ./.github/workflows/deploy.yml   # References out deployment workflow
+    secrets: inherit  # Inherits secrets for Azure deployment
+    
+  test:
+    uses: ./.github/workflows/test.yml
+    needs: [build]
