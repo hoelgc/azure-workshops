@@ -21,7 +21,7 @@ jobs:
         
       - name: Run tests
         run: |
-          dotnet test AzureWorkshopAppTests/AzureWorkshopAppTests.csproj\
+          dotnet test Workshop_2/Start/AzureWorkshop/AzureWorkshopAppTests/AzureWorkshopAppTests.csproj\
             --configuration Release\
             --no-restore\
             --verbosity normal
