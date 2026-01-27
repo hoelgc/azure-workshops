@@ -1,0 +1,61 @@
+# This workflow handles the deployment of our application to Azure Wep App Service
+# It's called by the main.yml workflow after build and login steps complete
+name: Deploy to Azure
+
+# Indicates this workflow can be called by other workflows
+# This enables modular workflow design and reusability
+on:
+  workflow_dispatch:    # Enables manual trigger from GitHub UI
+  workflow_call:        # Allows this workflow to be called by the main workflows
+    inputs:
+      releaseType:      # Input parameter to specify deployment environment
+        description: 'Where to release (test or prod)'
+        type: string
+        required: true
+        default: 'test'
+    
+jobs: 
+  # Main deployment job
+  deploy:
+    # Dynamic naming based on deployment target
+    name: Deploy to ${{ inputs.releaseType }}
+    # Uses GitHub environments for managing deployment configurations 
+    environment: ${{ inputs.releaseType }}          
+    
+    runs-on: ubuntu-latest      # Using Ubuntu for deployment tasks
+    
+    # Add variables section for environment-specific values
+    env:
+      AZURE_WEBAPP_NAME: app-azskolen-${{ inputs.releaseType }} # Dynamic app name based on environment
+
+    steps:
+    # Clear any existing Azure credentials to ensure clean authentication
+    - name: Clear Azure CLI Account
+      run: |
+        az account clear
+        
+    # Step 1: Authenticate with Azure using OIDC
+    # This is more secure than using stored credentials
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+      # These secrets should be configured in your GitHub Environment
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}               # Azure AD application ID
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}               # Azure AD tenant ID
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}   # Azure subscription ID
+    
+    # Step 2: Get the built application artifacts
+    # These were created by the build job and stored in GitHub
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with: 
+        name: dotnet-app-${{ github.sha }}   # Must match the artifact name from publish.yml
+        path: ./publish                      # Local path where artifacts will be downloaded
+        
+    # Step 3: Deploy the application to Azure Web App
+    # This step requires prior Azure authentication from azure-login.yml
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}    # Name of your Azure Web App
+        package: ./publish                        # Path to deployment files

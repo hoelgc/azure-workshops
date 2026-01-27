@@ -1,0 +1,55 @@
+# This is the main orchestrator workflow that coordinates the entire CI/CD pipeline
+# It demonstrates how to organize deployments into separate, reusable workflows
+name: CI/CD Pipeline
+
+# Add permissions block at workflow level
+permissions:
+  id-token: write # Required for OIDC authentication with Azure
+  contents: read  # Required for checking out code
+  
+# Define when this workflow should run
+on:
+  push:
+    branches:
+      - '**'
+  pull_request: 
+    branches:
+    - main            # Runs on PR to master branch
+  workflow_dispatch:  # Allows manual triggers from GitHub UI
+
+# Jobs run in parallel by default unless 'needs' is specified
+jobs:
+  # Step 1: Build the .NET application
+  # This job compiles our code and creates artifacts
+  build:
+    uses: ./.github/workflows/build.yml # References our build workflow.
+  
+  # Step 2: Run automated tests
+  # This ensures our code changes haven't broken anything
+  test:
+    uses: ./.github/workflows/test.yml
+    needs: [ build ]
+  
+  # Step 3: Publish to GitHub
+  # This will publish the built apps as an artifact in GitHub
+  publish:
+    uses: ./.github/workflows/publish.yml   # References our publish workflow
+    needs: [test]                           # Won't run until tests succeeds
+    
+  # Step 4: Deploy to test environment
+  # This gives us a chance to verify changes in a safe environment
+  deploy-test:
+    uses: ./.github/workflows/deploy.yml
+    with: 
+      releaseType: 'test'     # Specifies test environment
+    secrets: inherit          # Passes through repository secrets
+    needs: [publish]          # Won't run until publishing is finished
+    
+  # Step 5: Deploy to production
+  # Final step - only runs after successful test deployment
+  deploy-prod:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      releaseType: 'production'     # Specifies production environment
+    secrets: inherit                # Passes through repository secrets
+    needs: [deploy-test]            # Ensures test deployment succeeds before deploying to production
