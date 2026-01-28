@@ -50,6 +50,6 @@ jobs:
   deploy-prod:
     uses: ./.github/workflows/deploy.yml
     with:
-      releaseType: 'production'     # Specifies production environment
+      releaseType: 'prod'           # Specifies production environment
     secrets: inherit                # Passes through repository secrets
     needs: [deploy-test]            # Ensures test deployment succeeds before deploying to production
