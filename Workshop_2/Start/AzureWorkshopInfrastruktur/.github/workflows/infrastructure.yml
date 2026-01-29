@@ -1,0 +1,68 @@
+# This workflow validates Bicep Infrastructure as Code (IaC) files
+
+# Define the workflow name that appears in GitHub Actions
+name: IaC bicep validate
+
+# Set required permissions for the workflow
+permissions:
+  id-token: write     # write is needed for Azure OIDC authentication
+  contents: read      # read is needed to read the repository contents
+  
+# Define when this workflow should run
+on:
+  push: 
+    branches:
+      - master          # Run on every push to master branch
+  pull_request: 
+    branches:
+      - master          # Run on pull requests to master branch
+  workflow_dispatch:    # Allow manual trigger of the workflow
+
+jobs:
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    env: 
+      AZURE_RESOURCE_GROUP_NAME: ${{inputs.ReleaseType}} # TODO: usikker på denne!
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      # Step 2: Authenticate with Azure using OIDC
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}               # Azure AD application ID
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}               # Azure AD tenant ID
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}   # Azure subscription ID
+      
+      # Step 3: Validate Bicep syntax and build
+      - name: Bicep lint
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            # Build checks if Bicep can compile to ARM
+            az bicep build --file bicep/main.bicep
+            # Lint checks for best practices and potential errors
+            az bicep lint --file bicep/main.bicep
+      
+      # Step 4: Validate the deployment against Azure
+      - name: Bicep Validate
+        uses: azure/cli@v1
+        with:
+          inlineScript: |
+            # Validates if the template is valid for deployment
+            az deployment group validate \
+             --name validate-${{ github.run_id }} \
+             --resource-group ${{ env.AZURE_RESOURCE_GROUP_NAME }} \
+             --template-file ./bicep/main.bicep
+            
+      - name: What-If Deployment
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP_NAME }}
+          template: ./path/to/template.json
+          parameters: ./path/to/parameters.json
+          deploymentMode: Validate
+          additionalArguments: --what-if
+          
